@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% from '_m.html' import status_chip %}{% block title %}Patients{% endblock %}
+{% block body %}<div class="head"><h1>Patients</h1>{% if can('patients.write') %}<a class="btn" href="{{ url_for('main.patient_form') }}">Register patient</a>{% endif %}</div>
+<form class="row" method="get"><div class="grow"><label for="q">Search by patient ID, name or phone</label><input id="q" name="q" value="{{ q }}" autofocus></div><button class="btn" type="submit">Search</button></form>
+{% if rows %}<div class="tablewrap"><table><thead><tr><th>Patient ID</th><th>Name</th><th>Age</th><th>Phone</th><th>Visits</th><th>Status</th></tr></thead><tbody>
+{% for p in rows %}<tr><td><a href="{{ url_for('main.patient_detail', pid=p.id) }}">{{ p.patient_code }}</a></td><td>{{ p.name }}</td><td>{{ p.age }}</td><td>{{ p.phone }}</td><td>{{ p.visit_count }}</td><td>{{ status_chip('active' if p.is_active else 'inactive') }}</td></tr>{% endfor %}
+</tbody></table></div>{% else %}<div class="panel empty">{% if q %}No patient matches “{{ q }}”.{% else %}No patients to show yet.{% endif %}</div>{% endif %}{% endblock %}

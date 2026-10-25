@@ -1,0 +1,18 @@
+{% extends 'base.html' %}{% from '_m.html' import csrf, status_chip %}{% block title %}{{ p.patient_code }}{% endblock %}
+{% block body %}<div class="head"><div><h1>{{ p.name }}</h1><span class="muted">Patient ID {{ p.patient_code }}</span> {{ status_chip('active' if p.is_active else 'inactive') }}</div>
+<div class="noprint row">
+{% if can('visits.schedule') %}<a class="btn" href="{{ url_for('main.visit_new', patient_id=p.id) }}">New visit</a>{% endif %}
+{% if can('billing.write') %}<a class="btn alt" href="{{ url_for('main.bill_new', patient=p.patient_code) }}">New bill</a>{% endif %}
+{% if can('reports.patient') %}<a class="btn alt" href="{{ url_for('main.patient_report', pid=p.id) }}">Download report (PDF)</a>{% endif %}
+{% if can('patients.write') %}<a class="btn alt" href="{{ url_for('main.patient_form', pid=p.id) }}">Edit</a>
+<form class="inline" method="post" action="{{ url_for('main.patient_toggle', pid=p.id) }}" data-confirm="Change this patient's active status?">{{ csrf() }}<button class="btn alt" type="submit">{{ 'Deactivate' if p.is_active else 'Activate' }}</button></form>{% endif %}
+<button class="btn alt" type="button" onclick="window.print()">Print</button></div></div>
+<div class="panel"><dl class="kv"><dt>Date of birth</dt><dd>{{ p.date_of_birth|dmy }} (age {{ p.age }})</dd><dt>Phone</dt><dd>{{ p.phone }}</dd>
+<dt>Address</dt><dd class="pre">{{ p.address }}</dd><dt>Emergency contact</dt><dd>{{ p.emergency_contact or '-' }}</dd>
+<dt>Barcode</dt><dd><img class="barcode" src="{{ url_for('main.patient_barcode', pid=p.id) }}" alt="Barcode for {{ p.patient_code }}"></dd><dt>Registered</dt><dd>{{ p.registered_at|ist }}</dd><dt>Number of visits</dt><dd>{{ visits|length }}</dd></dl></div>
+<h2>Visit history</h2>
+{% for v in visits %}<div class="visit"><b><a href="{{ url_for('main.visit_detail', vid=v.id) }}">{{ v.visit_code }}</a></b> · {{ v.visit_date|dmy }} · {{ v.visit_type }}<br>
+<span class="muted">Dr. {{ v.doctor.name }}{% if v.nurse %} · Nurse {{ v.nurse.name }}{% endif %}</span><br>{{ v.reason }}
+{% if can('clinical.view') and v.diagnosis %}<br><b>Diagnosis:</b> {{ v.diagnosis }}{% endif %}
+{% if v.follow_up_date %}<br><span class="muted">Follow-up {{ v.follow_up_date|dmy }}</span>{% endif %}{% if v.discharge_date %}<br><span class="muted">Discharged {{ v.discharge_date|dmy }}</span>{% endif %}</div>
+{% else %}<div class="panel empty">No visits recorded yet.</div>{% endfor %}{% endblock %}

@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block title %}Reports{% endblock %}
+{% block body %}<h1>Patient report</h1>
+<form class="row" method="get"><div class="grow"><label for="q">Patient ID</label><input id="q" name="q" value="{{ q }}" placeholder="PAT-000001" autofocus></div><button class="btn" type="submit">Find patient</button></form>
+{% if found %}<div class="panel"><b>{{ found.name }}</b> · {{ found.patient_code }} · {{ found.visit_count }} visit(s)<br><br><a class="btn" href="{{ url_for('main.patient_report', pid=found.id) }}">Download patient report (PDF)</a></div>{% endif %}
+<p class="muted">Payment bills are downloaded separately from the Billing page.</p>{% endblock %}

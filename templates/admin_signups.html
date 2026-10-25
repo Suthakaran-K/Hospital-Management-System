@@ -1,0 +1,10 @@
+{% extends 'base.html' %}{% from '_m.html' import csrf, status_chip %}{% block title %}Sign-up requests{% endblock %}
+{% block body %}<h1>Sign-up requests</h1>
+{% if rows %}<div class="tablewrap"><table><thead><tr><th>Name</th><th>Username</th><th>Requested role</th><th>Status</th><th>Decision</th></tr></thead><tbody>
+{% for r in rows %}<tr><td>{{ r.full_name }}{% if r.email %}<br><span class="muted">{{ r.email }}</span>{% endif %}</td><td>{{ r.username }}</td><td>{{ r.requested_role|capitalize }}</td><td>{{ status_chip(r.status) }}</td>
+<td>{% if r.status == 'pending' %}<form method="post">{{ csrf() }}<input type="hidden" name="id" value="{{ r.id }}">
+<select name="role" aria-label="Role to grant">{% for x in roles %}<option value="{{ x }}" {% if x == r.requested_role %}selected{% endif %}>{{ x|capitalize }}</option>{% endfor %}</select>
+<select name="doctor_id" aria-label="Doctor record (if doctor)"><option value="">Doctor record…</option>{% for d in doctors %}<option value="{{ d.id }}">{{ d.name }}</option>{% endfor %}</select>
+<select name="nurse_id" aria-label="Nurse record (if nurse)"><option value="">Nurse record…</option>{% for n in nurses %}<option value="{{ n.id }}">{{ n.name }}</option>{% endfor %}</select>
+<button class="btn sm" name="decision" value="approve" type="submit">Approve</button> <button class="btn sm alt" name="decision" value="reject" type="submit">Reject</button></form>{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="panel empty">No requests yet.</div>{% endif %}{% endblock %}

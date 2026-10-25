@@ -1,0 +1,9 @@
+{% extends 'base.html' %}{% from '_m.html' import csrf, field, area %}{% block title %}{{ 'Edit' if obj else 'Register' }} patient{% endblock %}
+{% block body %}<h1>{{ 'Edit patient · ' ~ obj.patient_code if obj else 'Register patient' }}</h1>
+<form class="panel" method="post">{{ csrf() }}<div class="cols">
+{{ field('name', 'Full name', obj.name if obj else '', required=True, maxlength=120) }}
+{{ field('date_of_birth', 'Date of birth', obj.date_of_birth if obj else '', 'date', True, 'Age is calculated automatically.') }}
+{{ field('phone', 'Phone number', obj.phone if obj else '', 'tel', True, maxlength=20) }}
+{{ field('emergency_contact', 'Emergency contact', obj.emergency_contact if obj else '', hint='Name and phone number.', maxlength=150) }}
+</div>{{ area('address', 'Address / native place', obj.address if obj else '', True, 500) }}
+<button class="btn" type="submit">Save patient</button> <a class="btn alt" href="{{ url_for('main.patients') }}">Cancel</a></form>{% endblock %}

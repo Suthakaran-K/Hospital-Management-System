@@ -1,0 +1,13 @@
+{% macro field(name, label, value='', type='text', required=False, hint='', maxlength=None, attrs='') -%}
+<div class="f"><label for="{{ name }}">{{ label }}{% if not required %} <span class="hint">(optional)</span>{% endif %}</label>
+<input id="{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ value if value is not none else '' }}"{% if required %} required{% endif %}{% if maxlength %} maxlength="{{ maxlength }}"{% endif %} {{ attrs|safe }}>
+{% if hint %}<div class="hint">{{ hint }}</div>{% endif %}</div>
+{%- endmacro %}
+{% macro area(name, label, value='', required=False, maxlength=2000) -%}
+<div class="f"><label for="{{ name }}">{{ label }}{% if not required %} <span class="hint">(optional)</span>{% endif %}</label>
+<textarea id="{{ name }}" name="{{ name }}" maxlength="{{ maxlength }}"{% if required %} required{% endif %}>{{ value or '' }}</textarea></div>
+{%- endmacro %}
+{% macro csrf() -%}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{%- endmacro %}
+{% macro status_chip(s) -%}
+<span class="chip {{ 'ok' if s in ('paid','active','approved') else 'warn' if s in ('partial','unpaid','pending') else 'bad' if s in ('cancelled','refunded','inactive','rejected') else '' }}">{{ s|capitalize }}</span>
+{%- endmacro %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}{% from '_m.html' import csrf, field, status_chip %}{% block title %}{{ b.bill_number }}{% endblock %}
+{% block body %}<div class="head"><div><h1>Bill {{ b.bill_number }}</h1>{{ status_chip(b.status) }}{% if b.status_reason %} <span class="muted">{{ b.status_reason }}</span>{% endif %}</div>
+<div class="noprint"><a class="btn" href="{{ url_for('main.bill_pdf_download', bid=b.id) }}">Download bill (PDF)</a> <button class="btn alt" type="button" onclick="window.print()">Print</button></div></div>
+<div class="panel"><dl class="kv"><dt>Patient</dt><dd><a href="{{ url_for('main.patient_detail', pid=b.patient_id) }}">{{ b.patient.name }}</a> ({{ b.patient.patient_code }})</dd><dt>Visit</dt><dd>{{ b.visit.visit_code if b.visit else '-' }}</dd><dt>Date</dt><dd>{{ b.created_at|ist }}</dd></dl>
+<img class="barcode" src="{{ url_for('main.patient_barcode', pid=b.patient_id) }}" alt="Barcode for patient {{ b.patient.patient_code }}"></div>
+<div class="tablewrap"><table><thead><tr><th>Description</th><th class="num">Qty</th><th class="num">Unit price</th><th class="num">Amount</th></tr></thead><tbody>
+{% for i in b.items %}<tr><td>{{ i.description }}</td><td class="num">{{ i.quantity }}</td><td class="num">{{ i.unit_price }}</td><td class="num">{{ i.line_total }}</td></tr>{% endfor %}</tbody></table></div>
+<div class="tot"><div><span>Subtotal</span><span>{{ b.subtotal }}</span></div><div><span>Discount</span><span>- {{ b.discount }}</span></div><div><span>Tax</span><span>{{ b.tax }}</span></div>
+<div class="big"><span>Total</span><span>{{ b.total }}</span></div><div><span>Paid</span><span>{{ b.amount_paid }}</span></div><div class="big"><span>Balance</span><span>{{ b.balance }}</span></div></div>
+<h2>Payment history</h2>
+{% if b.payments %}<div class="tablewrap"><table><thead><tr><th>Date</th><th>Method</th><th>Reference</th><th>Received by</th><th class="num">Amount</th></tr></thead><tbody>
+{% for p in b.payments %}<tr><td>{{ p.paid_at|ist }}</td><td>{{ p.method }}</td><td>{{ p.reference_no or '-' }}</td><td>{{ p.received_by.username if p.received_by else '-' }}</td><td class="num">{{ p.amount }}</td></tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="panel empty">No payments recorded.</div>{% endif %}
+{% if b.is_open and can('billing.write') %}<form class="panel noprint" method="post" action="{{ url_for('main.bill_pay', bid=b.id) }}">{{ csrf() }}<h3>Record payment</h3><div class="cols">
+{{ field('amount', 'Amount (Rs.)', b.balance, 'number', True, 'Balance due: ' ~ b.balance, attrs='min="0.01" step="0.01"') }}
+<div class="f"><label for="method">Method</label><select id="method" name="method">{% for m in methods %}<option>{{ m }}</option>{% endfor %}</select></div>
+{{ field('reference_no', 'Transaction / reference number', '', hint='Required for non-cash payments. Never enter card numbers, PINs or CVVs.') }}</div>
+<button class="btn" type="submit">Record payment</button></form>{% endif %}
+{% if b.status not in ('cancelled','refunded') and can('billing.void') %}<form class="panel noprint" method="post" action="{{ url_for('main.bill_void', bid=b.id) }}" data-confirm="This cannot be undone. Continue?">{{ csrf() }}
+<h3>{{ 'Cancel bill' if b.amount_paid == 0 else 'Mark as refunded' }}</h3><p class="muted">The bill and its history are kept for the audit trail.</p>{{ field('reason', 'Reason', '', required=True, maxlength=200) }}<button class="btn danger" type="submit">{{ 'Cancel bill' if b.amount_paid == 0 else 'Mark as refunded' }}</button></form>{% endif %}{% endblock %}

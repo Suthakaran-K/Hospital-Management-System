@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% from '_m.html' import status_chip %}{% block title %}Billing{% endblock %}
+{% block body %}<div class="head"><h1>Billing</h1>{% if can('billing.write') %}<a class="btn" href="{{ url_for('main.bill_new') }}">New bill</a>{% endif %}</div>
+<form class="row" method="get"><div class="grow"><label for="q">Search by bill number, patient ID or name</label><input id="q" name="q" value="{{ q }}"></div>
+<div><label for="status">Status</label><select id="status" name="status"><option value="">All</option>{% for s, l in (('open','With balance'),('paid','Paid'),('cancelled','Cancelled'),('refunded','Refunded')) %}<option value="{{ s }}" {% if status == s %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div><button class="btn" type="submit">Apply</button></form>
+{% if rows %}<div class="tablewrap"><table><thead><tr><th>Bill</th><th>Patient</th><th>Date</th><th class="num">Total</th><th class="num">Balance</th><th>Status</th></tr></thead><tbody>
+{% for b in rows %}<tr><td><a href="{{ url_for('main.bill_detail', bid=b.id) }}">{{ b.bill_number }}</a></td><td>{{ b.patient.name }} <span class="muted">({{ b.patient.patient_code }})</span></td><td>{{ b.created_at|ist }}</td><td class="num">{{ b.total }}</td><td class="num">{{ b.balance }}</td><td>{{ status_chip(b.status) }}</td></tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="panel empty">No bills found.</div>{% endif %}{% endblock %}

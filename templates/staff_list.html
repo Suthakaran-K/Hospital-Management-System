@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% from '_m.html' import csrf, status_chip %}{% set one = kind[:-1] %}{% block title %}{{ kind|capitalize }}{% endblock %}
+{% block body %}<div class="head"><h1>{{ kind|capitalize }}</h1>{% if can('staff.manage') %}<a class="btn" href="{{ url_for('main.staff_form', kind=kind) }}">Add {{ one }}</a>{% endif %}</div>
+<form class="row" method="get"><div class="grow"><label for="q">Search by {{ one }} ID or name</label><input id="q" name="q" value="{{ q }}"></div><button class="btn" type="submit">Search</button></form>
+{% if rows %}<div class="tablewrap"><table><thead><tr><th>Photo</th><th>ID</th><th>Name</th>{% if kind == 'doctors' %}<th>Specialty</th>{% endif %}<th>Availability</th><th>Phone</th>
+{% if can('staff.manage') %}<th>Age</th><th>Joined</th><th>Email</th>{% endif %}<th>Status</th>{% if can('staff.manage') %}<th></th>{% endif %}</tr></thead><tbody>
+{% for r in rows %}<tr><td>{% if r.has_photo %}<img class="avatar" src="{{ url_for('main.staff_photo', kind=kind, sid=r.id) }}" alt="Photo of {{ r.name }}" loading="lazy">{% else %}<span class="avatar blank" aria-hidden="true">{{ r.name[:1] }}</span>{% endif %}</td><td>{{ r.code }}</td><td>{{ r.name }}</td>{% if kind == 'doctors' %}<td>{{ r.specialty }}</td>{% endif %}<td>{{ r.availability or '-' }}</td>
+<td>{% if can('staff.manage') or kind == 'doctors' %}{{ r.phone }}{% else %}-{% endif %}</td>
+{% if can('staff.manage') %}<td>{{ r.age }}</td><td>{{ r.joined_on|dmy }}</td><td>{{ r.email or '-' }}</td>{% endif %}
+<td>{{ status_chip('active' if r.is_active else 'inactive') }}</td>
+{% if can('staff.manage') %}<td><a href="{{ url_for('main.staff_form', kind=kind, sid=r.id) }}">Edit</a>
+<form class="inline" method="post" action="{{ url_for('main.staff_toggle', kind=kind, sid=r.id) }}" data-confirm="{{ 'Deactivate' if r.is_active else 'Activate' }} {{ r.name }}?">{{ csrf() }} <button class="linkbtn" type="submit">{{ 'Deactivate' if r.is_active else 'Activate' }}</button></form></td>{% endif %}</tr>{% endfor %}
+</tbody></table></div>{% else %}<div class="panel empty">No {{ kind }} found.</div>{% endif %}{% endblock %}

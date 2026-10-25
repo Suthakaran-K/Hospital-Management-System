@@ -1,0 +1,30 @@
+{% from '_m.html' import csrf %}<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}{{ cfg.HOSPITAL_NAME }}{% endblock %} · {{ cfg.HOSPITAL_NAME }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"><script src="{{ url_for('static', filename='app.js') }}" defer></script></head>
+<body>
+{% if current_user %}
+<div class="topbar"><button id="nav-toggle" type="button" aria-label="Open menu">Menu</button><b>{{ cfg.HOSPITAL_NAME }}</b></div>
+<div class="shell">
+<aside class="side"><div class="brand"><b>{{ cfg.HOSPITAL_NAME }}</b><span>Tenkasi</span></div>
+<nav aria-label="Main">
+{% set p = request.path %}
+<a href="{{ url_for('main.dashboard') }}" {% if p == '/' %}aria-current="page"{% endif %}>Dashboard</a>
+{% if can('patients.view') %}<a href="{{ url_for('main.patients') }}" {% if p.startswith('/patients') or p.startswith('/visits') %}aria-current="page"{% endif %}>Patients</a>{% endif %}
+{% if can('doctors.view') %}<a href="{{ url_for('main.staff_list', kind='doctors') }}" {% if p.startswith('/staff/doctors') %}aria-current="page"{% endif %}>Doctors</a>{% endif %}
+{% if can('nurses.view') %}<a href="{{ url_for('main.staff_list', kind='nurses') }}" {% if p.startswith('/staff/nurses') %}aria-current="page"{% endif %}>Nurses</a>{% endif %}
+{% if can('medicines.view') %}<a href="{{ url_for('main.medicines') }}" {% if p.startswith('/medicines') %}aria-current="page"{% endif %}>Medicines</a>{% endif %}
+{% if can('billing.view') %}<a href="{{ url_for('main.bills') }}" {% if p.startswith('/bills') %}aria-current="page"{% endif %}>Billing</a>{% endif %}
+{% if can('reports.patient') %}<a href="{{ url_for('main.reports') }}" {% if p.startswith('/reports') %}aria-current="page"{% endif %}>Reports</a>{% endif %}
+{% if can('users.manage') %}<a href="{{ url_for('main.admin_users') }}" {% if p.startswith('/admin/users') %}aria-current="page"{% endif %}>Accounts</a>
+{% if cfg.ENABLE_SIGNUP_REQUESTS %}<a href="{{ url_for('main.admin_signups') }}" {% if p.startswith('/admin/signups') %}aria-current="page"{% endif %}>Sign-up requests</a>{% endif %}{% endif %}
+{% if can('audit.view') %}<a href="{{ url_for('main.audit_log') }}" {% if p.startswith('/admin/audit') %}aria-current="page"{% endif %}>Audit history</a>{% endif %}
+</nav>
+<div class="who">{{ current_user.username }} · {{ current_user.role|capitalize }}<br><a href="{{ url_for('main.change_password') }}">Change password</a>
+<form method="post" action="{{ url_for('main.logout') }}">{{ csrf() }}<button class="linkbtn" type="submit">Sign out</button></form></div></aside>
+<div class="main"><main class="content" id="content">
+{% else %}<div class="main"><main class="content">{% endif %}
+{% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="flash {{ cat }}" role="{{ 'alert' if cat == 'error' else 'status' }}">{{ m }}</div>{% endfor %}{% endwith %}
+{% block body %}{% endblock %}
+</main>{% include '_footer.html' %}</div>{% if current_user %}</div>{% endif %}
+</body></html>

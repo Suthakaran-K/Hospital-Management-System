@@ -1,0 +1,13 @@
+{% from '_m.html' import csrf, field %}<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sign in · {{ cfg.HOSPITAL_NAME }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body><div class="auth"><section class="lead"><h1>{{ cfg.HOSPITAL_NAME }}</h1><p>{{ cfg.HOSPITAL_ADDRESS }}</p></section>
+<section class="form"><h2>Staff sign-in</h2>
+{% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="flash {{ cat }}" role="{{ 'alert' if cat == 'error' else 'status' }}">{{ m }}</div>{% endfor %}{% endwith %}
+<form method="post" autocomplete="on">{{ csrf() }}
+{{ field('username', 'Username', required=True, attrs='autocomplete="username" autofocus') }}
+{{ field('password', 'Password', type='password', required=True, attrs='autocomplete="current-password"') }}
+<button class="btn" type="submit">Sign in</button></form>
+<p class="muted">Forgot your password? Ask the hospital administrator to reset it.</p>
+{% if cfg.ENABLE_SIGNUP_REQUESTS %}<p><a href="{{ url_for('main.signup_request') }}">Request a staff account</a></p>{% endif %}
+{% include '_footer.html' %}</section></div></body></html>

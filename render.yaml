@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: thangam-hospital
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && flask --app app init-db
+    startCommand: gunicorn app:app --workers 2 --timeout 60
+    healthCheckPath: /healthz
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: DB_SSL_CA
+        value: /etc/ssl/certs/ca-certificates.crt
+      - key: ADMIN_BOOTSTRAP_USERNAME
+        sync: false
+      - key: ADMIN_BOOTSTRAP_PASSWORD
+        sync: false
+      - key: HOSPITAL_PHONE
+        sync: false
+      - key: HOSPITAL_EMAIL
+        sync: false
+      - key: HOSPITAL_MAP_URL
+        sync: false

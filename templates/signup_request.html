@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% from '_m.html' import csrf, field %}{% block title %}Request an account{% endblock %}
+{% block body %}<h1>Request a staff account</h1><p>An administrator must approve your request before you can sign in.</p>
+<form class="panel narrow" method="post">{{ csrf() }}
+{{ field('full_name', 'Full name', required=True) }}{{ field('username', 'Username', required=True) }}{{ field('email', 'Email address', type='email') }}
+<div class="f"><label for="role">Role</label><select id="role" name="role" required><option value="">Choose…</option><option value="doctor">Doctor</option><option value="nurse">Nurse</option><option value="reception">Reception / billing</option></select></div>
+{{ field('password', 'Password', type='password', required=True, hint='At least 10 characters, with letters and numbers.') }}
+<button class="btn" type="submit">Send request</button> <a href="{{ url_for('main.login') }}">Back to sign-in</a></form>{% endblock %}

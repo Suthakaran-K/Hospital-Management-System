@@ -1,0 +1,13 @@
+{% extends 'base.html' %}{% from '_m.html' import csrf, field %}{% block title %}{{ 'Edit' if obj else 'Add' }} medicine batch{% endblock %}
+{% block body %}<h1>{{ 'Edit batch · ' ~ obj.code if obj else 'Add medicine batch' }}</h1>
+<form class="panel" method="post">{{ csrf() }}<div class="cols">
+{{ field('name', 'Medicine name', obj.name if obj else '', required=True, maxlength=150) }}{{ field('strength_form', 'Strength / form', obj.strength_form if obj else '', hint='e.g. 500 mg tablet') }}
+{{ field('batch_no', 'Batch / lot number', obj.batch_no if obj else '', required=True, maxlength=60) }}{{ field('manufacturer', 'Manufacturer', obj.manufacturer if obj else '') }}
+{{ field('supplier', 'Supplier / purchase source', obj.supplier if obj else '') }}{{ field('unit', 'Unit', obj.unit if obj else 'tablet', required=True, maxlength=20) }}
+{% if not obj %}{{ field('quantity', 'Opening quantity', '0', 'number', True, attrs='min="0"') }}{% endif %}
+{{ field('manufacture_date', 'Manufacturing date', obj.manufacture_date if obj else '', 'date') }}{{ field('expiry_date', 'Expiry date', obj.expiry_date if obj else '', 'date', True) }}
+{{ field('purchase_price', 'Purchase price (per unit)', obj.purchase_price if obj else '0', 'number', True, attrs='min="0" step="0.01"') }}
+{{ field('selling_price', 'Selling price (per unit)', obj.selling_price if obj and obj.selling_price is not none else '', 'number', False, attrs='min="0" step="0.01"') }}
+{{ field('reorder_threshold', 'Reorder threshold', obj.reorder_threshold if obj else '0', 'number', True, 'Warn when stock is at or below this number.', attrs='min="0"') }}</div>
+{% if obj %}<p class="muted">To change stock quantity, use “Adjust” on the inventory list so the change is recorded with a reason.</p>{% endif %}
+<button class="btn" type="submit">Save batch</button> <a class="btn alt" href="{{ url_for('main.medicines') }}">Cancel</a></form>{% endblock %}

@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block title %}Audit history{% endblock %}
+{% block body %}<h1>Audit history</h1>
+<form class="row" method="get"><div class="grow"><label for="q">Filter by username, action prefix or record ID</label><input id="q" name="q" value="{{ q }}"></div><button class="btn" type="submit">Filter</button></form>
+{% if rows %}<div class="tablewrap"><table><thead><tr><th>When (IST)</th><th>User</th><th>Action</th><th>Record</th><th>Details</th></tr></thead><tbody>
+{% for r in rows %}<tr><td>{{ r.timestamp|ist }}</td><td>{{ r.username or '-' }}</td><td>{{ r.action }}</td><td>{{ r.entity_type or '' }} {{ r.entity_id or '' }}</td><td class="muted">{{ r.details or '' }}</td></tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="panel empty">No matching activity.</div>{% endif %}{% endblock %}

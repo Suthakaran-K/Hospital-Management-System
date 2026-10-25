@@ -1,0 +1,35 @@
+{% extends 'base.html' %}{% from '_m.html' import csrf, field, area %}{% block title %}{{ v.visit_code }}{% endblock %}
+{% block body %}<div class="head"><div><h1>Visit {{ v.visit_code }}</h1><a href="{{ url_for('main.patient_detail', pid=v.patient_id) }}">{{ v.patient.name }} ({{ v.patient.patient_code }})</a></div>
+<div class="noprint">{% if can('billing.write') %}<a class="btn alt" href="{{ url_for('main.bill_new', patient=v.patient.patient_code) }}">New bill</a>{% endif %}<button class="btn alt" type="button" onclick="window.print()">Print</button></div></div>
+<div class="panel"><dl class="kv"><dt>Date</dt><dd>{{ v.visit_date|dmy }} · {{ v.visit_type }}</dd><dt>Doctor</dt><dd>{{ v.doctor.name }} ({{ v.doctor.code }})</dd>
+<dt>Nurse</dt><dd>{{ v.nurse.name if v.nurse else '-' }}</dd><dt>Reason</dt><dd class="pre">{{ v.reason }}</dd>
+<dt>Follow-up</dt><dd>{{ v.follow_up_date|dmy }}</dd><dt>Discharge</dt><dd>{{ v.discharge_date|dmy }}</dd></dl></div>
+
+{% if can('visits.schedule') %}<h2>Edit visit details</h2>
+<form class="panel noprint" method="post" action="{{ url_for('main.visit_schedule', vid=v.id) }}">{{ csrf() }}<div class="cols">
+{{ field('visit_date', 'Visit date', v.visit_date, 'date', True) }}
+<div class="f"><label for="doctor_id">Doctor</label><select id="doctor_id" name="doctor_id">{% for d in doctors %}<option value="{{ d.id }}" {% if d.id == v.doctor_id %}selected{% endif %}>{{ d.name }}</option>{% endfor %}</select></div>
+<div class="f"><label for="nurse_id">Nurse</label><select id="nurse_id" name="nurse_id"><option value="">None</option>{% for n in nurses %}<option value="{{ n.id }}" {% if n.id == v.nurse_id %}selected{% endif %}>{{ n.name }}</option>{% endfor %}</select></div>
+{{ field('follow_up_date', 'Follow-up date', v.follow_up_date, 'date') }}{{ field('discharge_date', 'Discharge date', v.discharge_date, 'date') }}</div>
+{{ area('reason', 'Reason for visit', v.reason, True, 1000) }}<button class="btn" type="submit">Save changes</button></form>{% endif %}
+
+{% if can('clinical.view') %}<h2>Clinical record</h2>
+{% if can('visits.clinical') %}<form class="panel noprint" method="post" action="{{ url_for('main.visit_clinical', vid=v.id) }}">{{ csrf() }}
+{{ area('diagnosis', 'Diagnosis', v.diagnosis, False, 2000) }}{{ area('notes', 'Clinical notes', v.notes, False, 5000) }}
+<div class="cols">{{ field('follow_up_date', 'Follow-up date', v.follow_up_date, 'date') }}{{ field('discharge_date', 'Discharge date', v.discharge_date, 'date') }}</div>
+<button class="btn" type="submit">Save clinical details</button></form>
+{% else %}<div class="panel"><dl class="kv"><dt>Diagnosis</dt><dd class="pre">{{ v.diagnosis or '-' }}</dd><dt>Clinical notes</dt><dd class="pre">{{ v.notes or '-' }}</dd></dl></div>{% endif %}
+
+<h2>Nursing notes</h2>
+{% if can('visits.nursing') and cfg.ENABLE_NURSE_NOTES %}<form class="panel noprint" method="post" action="{{ url_for('main.visit_nursing', vid=v.id) }}">{{ csrf() }}{{ area('nursing_notes', 'Nursing notes and vitals', v.nursing_notes, False, 5000) }}<button class="btn" type="submit">Save nursing notes</button></form>
+{% else %}<div class="panel pre">{{ v.nursing_notes or 'No nursing notes.' }}</div>{% endif %}
+
+<h2>Medicines</h2>
+{% if v.medicines %}<div class="tablewrap"><table><thead><tr><th>Medicine</th><th>Batch</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th class="num">Qty</th><th>Instructions</th><th></th></tr></thead><tbody>
+{% for m in v.medicines %}<tr><td>{{ m.medicine.name }} {{ m.medicine.strength_form or '' }}</td><td>{{ m.medicine.batch_no }}</td><td>{{ m.dosage or '-' }}</td><td>{{ m.frequency or '-' }}</td><td>{{ m.duration or '-' }}</td><td class="num">{{ m.quantity }}</td><td>{{ m.instructions or '-' }}</td>
+<td>{% if can('visits.clinical') and cfg.ENABLE_DOCTOR_PRESCRIBING %}<form class="inline noprint" method="post" action="{{ url_for('main.visit_remove_medicine', vid=v.id, vmid=m.id) }}" data-confirm="Remove this medicine and return it to stock?">{{ csrf() }}<button class="linkbtn" type="submit">Remove</button></form>{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="panel empty">No medicines recorded for this visit.</div>{% endif %}
+{% if available_meds %}<form class="panel noprint" method="post" action="{{ url_for('main.visit_add_medicine', vid=v.id) }}">{{ csrf() }}<h3>Add medicine</h3><div class="cols">
+<div class="f"><label for="medicine_id">Medicine (in-date stock only)</label><select id="medicine_id" name="medicine_id" required><option value="">Choose…</option>{% for m in available_meds %}<option value="{{ m.id }}">{{ m.name }} {{ m.strength_form or '' }} · batch {{ m.batch_no }} · {{ m.quantity }} {{ m.unit }} left</option>{% endfor %}</select></div>
+{{ field('quantity', 'Quantity to dispense', '1', 'number', True, attrs='min="1"') }}{{ field('dosage', 'Dosage') }}{{ field('frequency', 'Frequency') }}{{ field('duration', 'Duration') }}{{ field('instructions', 'Instructions') }}</div>
+<button class="btn" type="submit">Add medicine</button></form>{% endif %}{% endif %}{% endblock %}

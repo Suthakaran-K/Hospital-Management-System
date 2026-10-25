@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% from '_m.html' import csrf, field %}{% set one = kind[:-1] %}{% block title %}{{ 'Edit' if obj else 'Add' }} {{ one }}{% endblock %}
+{% block body %}<h1>{{ 'Edit' if obj else 'Add' }} {{ one }}{% if obj %} · {{ obj.code }}{% endif %}</h1>
+<form class="panel" method="post" enctype="multipart/form-data">{{ csrf() }}<div class="cols">
+{{ field('name', 'Full name', obj.name if obj else '', required=True, maxlength=120) }}
+{% if kind == 'doctors' %}{{ field('specialty', 'Specialty / type', obj.specialty if obj else '', required=True, maxlength=100) }}{% endif %}
+{{ field('date_of_birth', 'Date of birth', obj.date_of_birth if obj else '', 'date', True, 'Age is calculated automatically.') }}
+{{ field('joined_on', 'Date of joining', obj.joined_on if obj else '', 'date', True) }}
+{{ field('phone', 'Phone number', obj.phone if obj else '', 'tel', True, maxlength=20) }}
+{{ field('email', 'Email address', obj.email if obj else '', 'email', False, maxlength=120) }}
+{{ field('availability', 'Availability / shift' if kind == 'nurses' else 'Availability schedule', obj.availability if obj else '', maxlength=255) }}
+</div>
+<div class="f"><label for="photo">Photo <span class="hint">(optional, JPEG, PNG or WebP, up to 1 MB)</span></label>
+{% if obj and obj.has_photo %}<img class="avatar big" src="{{ url_for('main.staff_photo', kind=kind, sid=obj.id) }}" alt="Current photo of {{ obj.name }}"><br>{% endif %}
+<input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp">
+{% if obj and obj.has_photo %}<label class="hint"><input type="checkbox" name="remove_photo" value="1"> Remove current photo</label>{% endif %}</div>
+<button class="btn" type="submit">Save {{ one }}</button> <a class="btn alt" href="{{ url_for('main.staff_list', kind=kind) }}">Cancel</a></form>{% endblock %}

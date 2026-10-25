@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% from '_m.html' import csrf, field %}{% block title %}New bill{% endblock %}
+{% block body %}<h1>New bill</h1>
+{% if not patient %}<form class="panel narrow" method="get"><div class="f"><label for="patient">Patient ID</label><input id="patient" name="patient" value="{{ code }}" placeholder="PAT-000001" required autofocus></div><button class="btn" type="submit">Continue</button></form>
+{% else %}<p>{{ patient.name }} · {{ patient.patient_code }}</p>
+<form class="panel" method="post">{{ csrf() }}<input type="hidden" name="patient" value="{{ patient.patient_code }}">
+<div class="f narrow"><label for="visit_id">Linked visit <span class="hint">(optional)</span></label><select id="visit_id" name="visit_id"><option value="">Not linked</option>{% for v in patient.visits %}<option value="{{ v.id }}">{{ v.visit_code }} · {{ v.visit_date|dmy }}</option>{% endfor %}</select></div>
+<div class="tablewrap"><table><thead><tr><th>Service / medicine</th><th>Qty</th><th>Unit price (Rs.)</th><th class="num">Amount</th><th></th></tr></thead><tbody id="bill-lines">
+<tr><td><input name="desc" maxlength="200" aria-label="Description"></td><td><input name="qty" type="number" min="1" value="1" aria-label="Quantity"></td><td><input name="price" type="number" min="0" step="0.01" aria-label="Unit price"></td><td class="num amt">0.00</td><td><button class="linkbtn rm" type="button">Remove</button></td></tr></tbody></table></div>
+<p><button class="btn alt sm" id="add-line" type="button">Add line</button></p>
+<div class="cols">{{ field('discount', 'Discount (Rs.)', '0', 'number', False, attrs='min="0" step="0.01"') }}{{ field('tax_percent', 'Tax (%)', '0', 'number', False, 'Applied after discount.', attrs='min="0" max="100" step="0.01"') }}</div>
+<p class="muted" id="preview" aria-live="polite"></p><button class="btn" type="submit">Create bill</button></form>{% endif %}{% endblock %}

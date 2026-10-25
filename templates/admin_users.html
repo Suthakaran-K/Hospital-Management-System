@@ -1,0 +1,15 @@
+{% extends 'base.html' %}{% from '_m.html' import csrf, field, status_chip %}{% block title %}Accounts{% endblock %}
+{% block body %}<h1>Staff accounts</h1>
+<form class="panel" method="post">{{ csrf() }}<h3>Create account</h3><div class="cols">
+{{ field('username', 'Username', required=True, maxlength=64) }}{{ field('email', 'Email address', '', 'email') }}
+<div class="f"><label for="role">Role</label><select id="role" name="role" data-role-select required>{% for r in roles %}<option value="{{ r }}" {% if r == 'reception' %}selected{% endif %}>{{ r|capitalize }}</option>{% endfor %}</select></div>
+<div class="f" data-for-role="doctor" hidden><label for="doctor_id">Doctor record</label><select id="doctor_id" name="doctor_id"><option value="">Choose…</option>{% for d in doctors %}<option value="{{ d.id }}">{{ d.name }} ({{ d.code }})</option>{% endfor %}</select></div>
+<div class="f" data-for-role="nurse" hidden><label for="nurse_id">Nurse record</label><select id="nurse_id" name="nurse_id"><option value="">Choose…</option>{% for n in nurses %}<option value="{{ n.id }}">{{ n.name }} ({{ n.code }})</option>{% endfor %}</select></div>
+{{ field('password', 'Temporary password', '', 'password', True, 'They must change it at first sign-in.', attrs='autocomplete="new-password"') }}</div>
+<button class="btn" type="submit">Create account</button></form>
+<div class="tablewrap"><table><thead><tr><th>Username</th><th>Role</th><th>Linked record</th><th>Status</th><th>Last sign-in</th><th>Actions</th></tr></thead><tbody>
+{% for u in users %}<tr><td>{{ u.username }}{% if u.email %}<br><span class="muted">{{ u.email }}</span>{% endif %}</td><td>{{ u.role|capitalize }}</td><td>{{ u.doctor.name if u.doctor else (u.nurse.name if u.nurse else '-') }}</td>
+<td>{{ status_chip('active' if u.is_active else 'inactive') }}{% if u.locked_until and u.locked_until > now_utc %} <span class="chip bad">Locked</span>{% endif %}</td><td>{{ u.last_login_at|ist }}</td>
+<td>{% if u.id != current_user.id %}<form class="inline" method="post" action="{{ url_for('main.admin_user_update', uid=u.id) }}">{{ csrf() }}<input type="hidden" name="action" value="toggle"><button class="linkbtn" type="submit">{{ 'Deactivate' if u.is_active else 'Activate' }}</button></form> · {% endif %}
+<form class="inline" method="post" action="{{ url_for('main.admin_user_update', uid=u.id) }}">{{ csrf() }}<input type="hidden" name="action" value="unlock"><button class="linkbtn" type="submit">Unlock</button></form>
+<form method="post" action="{{ url_for('main.admin_user_update', uid=u.id) }}" data-confirm="Reset the password for {{ u.username }}?">{{ csrf() }}<input type="hidden" name="action" value="reset"><input name="password" type="password" placeholder="New temporary password" aria-label="New temporary password" autocomplete="new-password" required><button class="btn sm" type="submit">Reset password</button></form></td></tr>{% endfor %}</tbody></table></div>{% endblock %}

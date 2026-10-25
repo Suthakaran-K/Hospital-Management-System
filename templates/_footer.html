@@ -1,0 +1,4 @@
+<footer class="foot"><b>{{ cfg.HOSPITAL_NAME }}</b> · {{ cfg.HOSPITAL_ADDRESS }}
+{% if cfg.HOSPITAL_PHONE %} · {{ cfg.HOSPITAL_PHONE }}{% endif %}{% if cfg.HOSPITAL_EMAIL %} · {{ cfg.HOSPITAL_EMAIL }}{% endif %}
+<div>{% if cfg.HOSPITAL_MAP_URL %}<a href="{{ cfg.HOSPITAL_MAP_URL }}" rel="noopener noreferrer" target="_blank">Map</a>{% endif %}
+{% for label, url in cfg.SOCIAL_LINKS %}<a href="{{ url }}" rel="noopener noreferrer" target="_blank">{{ label }}</a>{% endfor %}</div></footer>

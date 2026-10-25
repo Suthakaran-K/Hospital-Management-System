@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block title %}Dashboard{% endblock %}
+{% block body %}<h1>Dashboard</h1>
+<p class="muted">Counts only. Open a section to see records you are allowed to view.</p>
+{% if stats %}<div class="grid">{% for label, n, ep, args in stats %}<a class="stat" href="{{ url_for(ep, **args) }}"><b>{{ n }}</b><span>{{ label }}</span></a>{% endfor %}</div>
+{% else %}<div class="panel empty">Nothing to summarise for your role yet.</div>{% endif %}{% endblock %}

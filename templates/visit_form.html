@@ -1,0 +1,10 @@
+{% extends 'base.html' %}{% from '_m.html' import csrf, field, area %}{% block title %}New visit{% endblock %}
+{% block body %}<h1>New visit · {{ patient.name }} ({{ patient.patient_code }})</h1>
+<form class="panel" method="post">{{ csrf() }}<input type="hidden" name="patient_id" value="{{ patient.id }}"><div class="cols">
+{{ field('visit_date', 'Visit / admission date', today, 'date', True) }}
+<div class="f"><label for="visit_type">Visit type</label><select id="visit_type" name="visit_type"><option>Outpatient</option><option>Inpatient</option></select></div>
+<div class="f"><label for="doctor_id">Attending doctor</label><select id="doctor_id" name="doctor_id" required><option value="">Choose…</option>{% for d in doctors %}<option value="{{ d.id }}">{{ d.name }} ({{ d.specialty }})</option>{% endfor %}</select></div>
+<div class="f"><label for="nurse_id">Assigned nurse <span class="hint">(optional)</span></label><select id="nurse_id" name="nurse_id"><option value="">None</option>{% for n in nurses %}<option value="{{ n.id }}">{{ n.name }}</option>{% endfor %}</select></div>
+{{ field('follow_up_date', 'Follow-up date', '', 'date') }}</div>
+{{ area('reason', 'Symptoms / reason for visit', '', True, 1000) }}
+<button class="btn" type="submit">Save visit</button> <a class="btn alt" href="{{ url_for('main.patient_detail', pid=patient.id) }}">Cancel</a></form>{% endblock %}
